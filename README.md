@@ -1,5 +1,6 @@
 # oiseaux
 simulation d'un essaim en vol en 2D
+
 todo :
 - réécrire le code en ES6 (let et class)
 - Garder le moteur d'animation
