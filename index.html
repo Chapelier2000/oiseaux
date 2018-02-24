@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta charset="utf-8">
+		<title>Objets</title>
+    </head>
+    <body onload="init()">
+		<canvas id="board" width="1000" height="500"></canvas>
+		<p id="nbc">NBC : </p>
+    </body>
+</html>
+<script>
+	var canvas; //canvas
+	var context; //context
+	var timer;
+	var cercles=[];
+	var nbmax=10;
+	var lnbc;
+	
+	function Cercle(x,y,r,id) {
+		//construction de l'objet
+		this.x=x;
+		this.y=y;
+		this.r=r;
+		this.id=id;
+		this.vgros=1;
+		this.stop=false;
+		this.vx=getRandomInt(-5,5);
+		this.vy=getRandomInt(-5,5);
+		
+		var a=getRandomInt(0,255);
+		var b=getRandomInt(0,255);
+		var c=getRandomInt(0,255);
+		this.c="rgba(" + a + "," + b + "," + c + ",1)";
+		
+		this.dessiner = function() {		
+			context.fillStyle = this.c;
+			context.strokeStyle = this.c;
+			context.beginPath(); //On démarre un nouveau tracé.
+			context.arc(this.x, this.y, this.r, 0, Math.PI*2); //On trace la courbe délimitant notre forme
+			context.fill(); //On utilise la méthode fill(); si l'on veut une forme pleine
+			context.closePath();
+		}
+		
+		//Pour arreter le cercle
+		this.testChangeSens= function(maxx,maxy) {
+				if ( (this.x-this.r<0) || (this.y-this.r<0) || (this.x+this.r>maxx) || (this.y+this.r>maxy) || this.r<1 || this.touchette(cercles) ) {
+					this.vgros=-this.vgros;
+					if (this.r<1)
+						; //ne rien faire !
+					else if ((this.x-this.r<0) || (this.x+this.r>maxx) )
+						this.vx=-this.vx;
+					else if ((this.y-this.r<0) || (this.y+this.r>maxy) )
+						this.vy=-this.vy;
+					else {
+						this.vx=-this.vx;
+						this.vy=-this.vy;
+					}
+					
+					//this.vgros=0;
+				}
+		}
+		
+		this.touchette=function(tableau) {
+			resultat=false;
+			for (var i=0;i<tableau.length;i++) {
+				if (this.id != i)
+					if (distance2(this.x,this.y,tableau[i].x,tableau[i].y) <= (tableau[i].r + this.r)*(tableau[i].r + this.r) ) {
+						//this.c=tableau[i].c;
+						resultat=true;
+						break;
+					}
+			}
+			return resultat;
+		}
+
+		this.grossir = function() {
+				this.r += this.vgros;
+		}
+		
+		this.bouger = function() {
+				this.x += this.vx;
+				this.y += this.vy;
+		}
+	}
+
+	
+	function init() {
+		canvas = document.getElementById("board");		
+		lnbc = document.getElementById("nbc");		
+		context = canvas.getContext('2d');
+		timer = setInterval(animation, 1000/30);
+	}
+
+    function animation() {
+		context.fillStyle = "rgba(255, 255, 255, 1)";
+		context.fillRect(0, 0, canvas.width, canvas.height);
+		
+		if (cercles.length<nbmax)
+			creerCercle();
+			
+		for(i=0; i<cercles.length;i++) {
+			cercles[i].testChangeSens(canvas.width,canvas.height);
+			cercles[i].grossir();
+			cercles[i].bouger();
+			cercles[i].dessiner();
+		}
+		
+		lnbc.innerHTML=cercles.length;
+	}
+	
+	function creerCercle() {
+		var x = getRandomInt(0,canvas.width);
+		var y = getRandomInt(0,canvas.height);
+		var creer=true;
+		for (var i=0;i<cercles.length;i++) {
+			if (distance2(x,y,cercles[i].x,cercles[i].y) < cercles[i].r * cercles[i].r ) {
+				creer=false;
+				break;
+			}
+		}
+		if (creer)
+			cercles.push(new Cercle(x,y,1,cercles.length));
+	}
+		
+	function getRandomInt(min, max) {
+	  min = Math.ceil(min);
+	  max = Math.floor(max);
+	  return Math.floor(Math.random() * (max - min)) + min;
+	}
+	
+	function distance2(a,b,x,y) {
+		return (a-x)*(a-x) + (b-y)*(b-y);
+	}
+		
+</script>
+<style>
+	body {
+		color:#000;
+	}
+	
+	canvas {
+		border : 1px solid #000;
+	}
+</style>
