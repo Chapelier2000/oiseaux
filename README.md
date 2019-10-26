@@ -1,5 +1,6 @@
 # oiseaux
 simulation d'un essaim en vol en 2D
+
 En fait pas du tout : il s'agit de bulles en expansion
 
 todo :
